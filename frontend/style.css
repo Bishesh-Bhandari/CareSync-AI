@@ -1,0 +1,292 @@
+/* =========================================================
+   HealthSync AI — Stylesheet
+   Theme: Clean, clinical-modern with warm accents
+   ========================================================= */
+
+/* ===== Google Font Import ===== */
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+/* ===== CSS Custom Properties (Design Tokens) ===== */
+:root {
+  --clr-bg:          #f0f4f8;
+  --clr-surface:     #ffffff;
+  --clr-primary:     #1a6b5a;
+  --clr-primary-lt:  #e6f4f1;
+  --clr-accent:      #3ecfa3;
+  --clr-text:        #1c2b2a;
+  --clr-muted:       #6b8080;
+  --clr-border:      #d4e2de;
+  --clr-success-bg:  #edfaf5;
+  --clr-success-txt: #0f6b48;
+  --clr-error-bg:    #fff0f0;
+  --clr-error-txt:   #c0392b;
+
+  --radius-sm:  8px;
+  --radius-md:  16px;
+  --radius-lg:  24px;
+
+  --shadow-card: 0 4px 24px rgba(26, 107, 90, 0.10), 0 1px 4px rgba(0,0,0,0.06);
+  --shadow-btn:  0 4px 14px rgba(62, 207, 163, 0.35);
+
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body:    'DM Sans', sans-serif;
+
+  --transition: 0.22s ease;
+}
+
+/* ===== Reset & Base Styles ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--clr-bg);
+  color: var(--clr-text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(62, 207, 163, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 90%, rgba(26, 107, 90, 0.06) 0%, transparent 50%);
+}
+
+/* ===== Page Wrapper ===== */
+.page-wrapper {
+  width: 100%;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ===== Header ===== */
+.header {
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+.logo-icon {
+  font-size: 1.6rem;
+  color: var(--clr-accent);
+  display: block;
+  margin-bottom: 0.4rem;
+  animation: pulse 2.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.7; transform: scale(1.15); }
+}
+
+.brand-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  color: var(--clr-primary);
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+
+.brand-title .accent {
+  color: var(--clr-accent);
+}
+
+.brand-tagline {
+  margin-top: 0.4rem;
+  font-size: 0.95rem;
+  color: var(--clr-muted);
+  font-weight: 300;
+  letter-spacing: 0.3px;
+}
+
+/* ===== Main Card ===== */
+.card {
+  background: var(--clr-surface);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem 2rem;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--clr-border);
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--clr-primary);
+  line-height: 1.2;
+}
+
+.card-description {
+  font-size: 0.92rem;
+  color: var(--clr-muted);
+  line-height: 1.65;
+}
+
+/* ===== Form Group ===== */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--clr-primary);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+/* ===== Textarea ===== */
+.symptom-textarea {
+  width: 100%;
+  padding: 1rem 1.1rem;
+  border: 1.5px solid var(--clr-border);
+  border-radius: var(--radius-md);
+  background: var(--clr-primary-lt);
+  font-family: var(--font-body);
+  font-size: 0.97rem;
+  color: var(--clr-text);
+  resize: vertical;
+  line-height: 1.6;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  outline: none;
+}
+
+.symptom-textarea:focus {
+  border-color: var(--clr-accent);
+  box-shadow: 0 0 0 3px rgba(62, 207, 163, 0.18);
+  background: #ffffff;
+}
+
+.symptom-textarea::placeholder {
+  color: #9ab5b0;
+  font-style: italic;
+}
+
+.input-hint {
+  font-size: 0.78rem;
+  color: var(--clr-muted);
+}
+
+/* ===== Submit Button ===== */
+.submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.9rem 1.5rem;
+  background: var(--clr-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  box-shadow: var(--shadow-btn);
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+
+.submit-btn:hover {
+  background: var(--clr-accent);
+  color: var(--clr-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(62, 207, 163, 0.45);
+}
+
+.submit-btn:active {
+  transform: translateY(0px);
+  box-shadow: none;
+}
+
+.btn-icon {
+  font-size: 1.1rem;
+  transition: transform var(--transition);
+}
+
+.submit-btn:hover .btn-icon {
+  transform: translateX(4px);
+}
+
+/* ===== Response Section ===== */
+.response-section {
+  border-radius: var(--radius-md);
+  padding: 1rem 1.2rem;
+  animation: fadeIn 0.4s ease;
+}
+
+.response-section.success {
+  background: var(--clr-success-bg);
+  border: 1.5px solid #a3e8cf;
+}
+
+.response-section.error {
+  background: var(--clr-error-bg);
+  border: 1.5px solid #f5c0bb;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.response-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+
+.response-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.response-section.success .response-icon { color: var(--clr-success-txt); }
+.response-section.error   .response-icon { color: var(--clr-error-txt);   }
+
+.response-message {
+  font-size: 0.93rem;
+  line-height: 1.55;
+}
+
+.response-section.success .response-message { color: var(--clr-success-txt); }
+.response-section.error   .response-message { color: var(--clr-error-txt);   }
+
+/* ===== Footer ===== */
+.footer {
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--clr-muted);
+  padding-bottom: 0.5rem;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 480px) {
+  .card {
+    padding: 1.8rem 1.2rem;
+  }
+
+  .brand-title {
+    font-size: 1.9rem;
+  }
+
+  .submit-btn {
+    font-size: 0.95rem;
+  }
+}

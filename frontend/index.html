@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HealthSync AI</title>
+
+    <!-- External stylesheet -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+
+    <!-- ===== Main Page Wrapper ===== -->
+    <div class="page-wrapper">
+
+      <!-- ===== Header Section ===== -->
+      <header class="header">
+        <div class="logo-icon" aria-hidden="true">✦</div>
+        <h1 class="brand-title">HealthSync <span class="accent">AI</span></h1>
+        <p class="brand-tagline">Your intelligent health companion</p>
+      </header>
+
+      <!-- ===== Main Content Card ===== -->
+      <main class="card">
+
+        <!-- Card heading -->
+        <h2 class="card-title">How are you feeling today?</h2>
+        <p class="card-description">
+          Describe your symptoms, discomforts, or any health updates in your own words.
+          Our AI will review your input and provide guidance.
+        </p>
+
+        <!-- ===== Input Form Area ===== -->
+        <div class="form-group">
+
+          <!-- Label for accessibility -->
+          <label for="symptom-input" class="input-label">
+            Describe your symptoms
+          </label>
+
+          <!-- Large textarea for patient input -->
+          <textarea
+            id="symptom-input"
+            class="symptom-textarea"
+            placeholder="e.g. I have a mild headache since morning, feeling a bit tired, and my throat is slightly sore..."
+            rows="7"
+            aria-label="Describe your symptoms"
+          ></textarea>
+
+          <!-- Character hint -->
+          <span class="input-hint">Be as detailed as possible for a better assessment.</span>
+        </div>
+
+        <!-- ===== Submit Button ===== -->
+        <button id="submit-btn" class="submit-btn" type="button">
+          <span class="btn-text">Analyze Symptoms</span>
+          <span class="btn-icon" aria-hidden="true">→</span>
+        </button>
+
+        <!-- ===== Response / Feedback Section ===== -->
+        <!-- This section will be populated by script.js (and later by FastAPI responses) -->
+        <section id="response-section" class="response-section" aria-live="polite" hidden>
+          <div class="response-inner">
+            <span class="response-icon" aria-hidden="true">✓</span>
+            <p id="response-message" class="response-message"></p>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- ===== Footer ===== -->
+      <footer class="footer">
+        <p>HealthSync AI &mdash; Not a substitute for professional medical advice.</p>
+      </footer>
+
+    </div><!-- end .page-wrapper -->
+
+    <!-- External JavaScript -->
+    <script src="script.js"></script>
+
+  </body>
+</html>

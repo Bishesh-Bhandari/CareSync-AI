@@ -1,4 +1,4 @@
-from logs import add_log, get_logs
+from backend.logs import add_log, get_logs
 
 while True:
 
