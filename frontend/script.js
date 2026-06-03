@@ -3,7 +3,6 @@
 //  Handles form interaction and prepares for FastAPI backend
 // =========================================================
 
-
 // ===== Step 1: Wait for the DOM to fully load =====
 document.addEventListener("DOMContentLoaded", function () {
 
