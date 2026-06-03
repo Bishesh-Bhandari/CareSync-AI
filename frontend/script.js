@@ -1,12 +1,9 @@
 // =========================================================
 //  HealthSync AI — script.js
-//  Handles form interaction and prepares for FastAPI backend
 // =========================================================
 
-// ===== Step 1: Wait for the DOM to fully load =====
 document.addEventListener("DOMContentLoaded", function () {
 
-  // ===== Step 2: Grab references to key HTML elements =====
   const submitBtn       = document.getElementById("submit-btn");
   const symptomInput    = document.getElementById("symptom-input");
   const responseSection = document.getElementById("response-section");
@@ -14,13 +11,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const responseIcon    = responseSection.querySelector(".response-icon");
 
 
-  // ===== Step 3: Listen for the submit button click =====
   submitBtn.addEventListener("click", function () {
 
-    // Step 4: Read and trim the textarea value
-    const userInput = symptomInput.value.trim();
+  const userInput = symptomInput.value.trim();
 
-    // Step 5: Prevent empty submissions
+    // Step 1: Validate input immediately
     if (userInput === "") {
       showResponse(
         "error",
@@ -30,54 +25,90 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    // Step 6: Show a success message
-    showResponse(
-      "success",
-      "✓",
-      "Your symptoms have been received. Analyzing your input — please wait..."
-    );
+    // Step 2: Show loading state immediately
+    submitBtn.disabled = true;
 
-    // Step 7: Send to FastAPI backend (uncomment when ready)
-    // sendToBackend(userInput);
+    submitBtn.querySelector(".btn-text").textContent =
+      "Analyzing...";
+
+    submitBtn.querySelector(".btn-icon").textContent =
+      "⏳";
+
+
+    try {
+
+  const response = await fetch(
+    "http://127.0.0.1:8000/analyze",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        symptoms: userInput
+      })
+    }
+  );
+
+  const data = await response.json();
+
+  console.log(data);
+
+} catch (error) {
+  console.error(error);
+}gi
+
+    // Step 3: Simulate AI processing
+    
+
+      showResponse(
+        "success",
+        "✓",
+        `
+        <h3>AI Assessment</h3>
+
+        <p><strong>Possible Condition:</strong> Common Cold</p>
+
+        <p><strong>Severity:</strong> Low</p>
+
+        <p><strong>Recommendations:</strong></p>
+
+        <ul>
+          <li>Drink plenty of fluids</li>
+          <li>Get adequate rest</li>
+          <li>Monitor symptoms</li>
+        </ul>
+        `
+      );
+
+      // Reset button
+      submitBtn.disabled = false;
+
+      submitBtn.querySelector(".btn-text").textContent =
+        "Analyze Symptoms";
+
+      submitBtn.querySelector(".btn-icon").textContent =
+        "→";
+
+    }, 2000);
 
   });
 
 
   // =========================================================
-  //  Helper: showResponse
+  //  Helper Function
   // =========================================================
+
   function showResponse(type, icon, message) {
+
     responseSection.classList.remove("success", "error");
     responseSection.classList.add(type);
-    responseIcon.textContent    = icon;
-    responseMessage.textContent = message;
+
+    responseIcon.textContent = icon;
+
+    responseMessage.innerHTML = message;
+
     responseSection.removeAttribute("hidden");
   }
 
-
-  // =========================================================
-  //  FastAPI Integration — uncomment when backend is ready
-  // =========================================================
-
-  /*
-  async function sendToBackend(inputText) {
-    showResponse("success", "⏳", "Connecting to HealthSync AI backend...");
-
-    try {
-      const response = await fetch("http://127.0.0.1:8000/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ symptoms: inputText })
-      });
-
-      const data = await response.json();
-      showResponse("success", "✓", data.result || "Analysis complete.");
-
-    } catch (error) {
-      console.error("Backend error:", error);
-      showResponse("error", "✗", "Could not reach the server. Please try again later.");
-    }
-  }
-  */
-
-}); // end DOMContentLoaded
+});

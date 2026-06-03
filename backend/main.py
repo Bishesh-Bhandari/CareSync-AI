@@ -1,17 +1,22 @@
-from backend.logs import add_log, get_logs
+from fastapi import FastAPI
+from pydantic import BaseModel
 
-while True:
+app = FastAPI()
 
-    symptom = input("Enter symptom (or type exit): ")
+class SymptomRequest(BaseModel):
+    symptoms: str
 
-    if symptom.lower() == "exit":
-        break
+@app.get("/")
+def home():
+    return {
+        "message": "HealthSync Backend Running"
+    }
 
-    add_log(symptom)
+@app.post("/analyze")
+def analyze(data: SymptomRequest):
 
-all_logs = get_logs()
+    print(data.symptoms)
 
-print("\nPatient Logs:")
-
-for log in all_logs:
-    print("-", log)
+    return {
+        "received": data.symptoms
+    }
