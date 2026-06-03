@@ -1,5 +1,5 @@
 // =========================================================
-//  HealthSync AI — script.js
+//  HealthSync AI — script.js  (fixed + improved)
 // =========================================================
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -10,12 +10,29 @@ document.addEventListener("DOMContentLoaded", function () {
   const responseMessage = document.getElementById("response-message");
   const responseIcon    = responseSection.querySelector(".response-icon");
 
+  // -------------------------------------------------------
+  //  Button state helpers  (DRY – avoids repetition)
+  // -------------------------------------------------------
+  function setButtonLoading() {
+    submitBtn.disabled = true;
+    submitBtn.querySelector(".btn-text").textContent = "Analyzing...";
+    submitBtn.querySelector(".btn-icon").textContent = "⏳";
+  }
 
-  submitBtn.addEventListener("click", function () {
+  function resetButton() {
+    submitBtn.disabled = false;
+    submitBtn.querySelector(".btn-text").textContent = "Analyze Symptoms";
+    submitBtn.querySelector(".btn-icon").textContent = "→";
+  }
 
-  const userInput = symptomInput.value.trim();
+  // -------------------------------------------------------
+  //  Main click handler
+  // -------------------------------------------------------
+  submitBtn.addEventListener("click", async function () {
 
-    // Step 1: Validate input immediately
+    const userInput = symptomInput.value.trim();
+
+    // ── Step 1: Validate input ──────────────────────────
     if (userInput === "") {
       showResponse(
         "error",
@@ -25,90 +42,89 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    // Step 2: Show loading state immediately
-    submitBtn.disabled = true;
+    // ── Step 2: Enter loading state ─────────────────────
+    setButtonLoading();
 
-    submitBtn.querySelector(".btn-text").textContent =
-      "Analyzing...";
-
-    submitBtn.querySelector(".btn-icon").textContent =
-      "⏳";
-
-
+    // ── Step 3: Call the API ────────────────────────────
     try {
+      const response = await fetch("http://127.0.0.1:8000/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ symptoms: userInput }),
+      });
 
-  const response = await fetch(
-    "http://127.0.0.1:8000/analyze",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        symptoms: userInput
-      })
-    }
-  );
+      // Bug fix #5 — treat non-2xx responses as errors
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Server error ${response.status}: ${errText}`);
+      }
 
-  const data = await response.json();
+      const data = await response.json();
 
-  console.log(data);
-
-} catch (error) {
-  console.error(error);
-}gi
-
-    // Step 3: Simulate AI processing
-    
+      // Bug fix #3 — actually USE the data from the API
+      const condition      = data.condition      ?? "Unknown";
+      const severity       = data.severity       ?? "Unknown";
+      const recommendations = Array.isArray(data.recommendations)
+        ? data.recommendations
+        : ["Please consult a healthcare professional."];
 
       showResponse(
         "success",
         "✓",
         `
         <h3>AI Assessment</h3>
-
-        <p><strong>Possible Condition:</strong> Common Cold</p>
-
-        <p><strong>Severity:</strong> Low</p>
-
+        <p><strong>Possible Condition:</strong> ${escapeHtml(condition)}</p>
+        <p><strong>Severity:</strong> ${escapeHtml(severity)}</p>
         <p><strong>Recommendations:</strong></p>
-
         <ul>
-          <li>Drink plenty of fluids</li>
-          <li>Get adequate rest</li>
-          <li>Monitor symptoms</li>
+          ${recommendations.map(r => `<li>${escapeHtml(r)}</li>`).join("")}
         </ul>
         `
       );
 
-      // Reset button
-      submitBtn.disabled = false;
-
-      submitBtn.querySelector(".btn-text").textContent =
-        "Analyze Symptoms";
-
-      submitBtn.querySelector(".btn-icon").textContent =
-        "→";
-
-    }, 2000);
-
+    } catch (error) {
+      // Bug fix #4 — button always resets, even on error
+      console.error("HealthSync API error:", error);
+      showResponse(
+        "error",
+        "✗",
+        `
+        <h3>Something went wrong</h3>
+        <p>${escapeHtml(error.message)}</p>
+        <p>Please try again or contact support if the problem persists.</p>
+        `
+      );
+    } finally {
+      // Bug fix #4 — runs whether the request succeeded or failed
+      resetButton();
+    }
   });
 
 
   // =========================================================
-  //  Helper Function
+  //  Helper: render the response card
   // =========================================================
-
   function showResponse(type, icon, message) {
-
     responseSection.classList.remove("success", "error");
     responseSection.classList.add(type);
 
-    responseIcon.textContent = icon;
-
+    responseIcon.textContent  = icon;
     responseMessage.innerHTML = message;
 
     responseSection.removeAttribute("hidden");
+  }
+
+
+  // =========================================================
+  //  Helper: prevent XSS when inserting API strings into HTML
+  // =========================================================
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g,  "&amp;")
+      .replace(/</g,  "&lt;")
+      .replace(/>/g,  "&gt;")
+      .replace(/"/g,  "&quot;")
+      .replace(/'/g,  "&#39;");
   }
 
 });
