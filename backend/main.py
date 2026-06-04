@@ -1,26 +1,29 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import google.generativeai as genai
-import os, json
+from dotenv import load_dotenv
+import os
 import json
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-model = genai.GenerativeModel("gemini-1.5-flash")
 
+load_dotenv()
+# Configure Gemini
+genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+model = genai.GenerativeModel("gemini-3.5-flash")
 
 app = FastAPI()
 
-# Allow your frontend to call the API
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Tighten this in production
+    allow_origins=["*"],  # Restrict later
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
+# Request schema
 class SymptomRequest(BaseModel):
-    symptoms: str
+    symptoms: str = Field(min_length=5)
 
 @app.get("/")
 def home():
@@ -28,23 +31,49 @@ def home():
 
 @app.post("/analyze")
 def analyze(data: SymptomRequest):
+
     prompt = f"""
     A patient describes their symptoms as: "{data.symptoms}"
 
-    Respond ONLY with a JSON object — no markdown, no explanation — in this exact shape:
+    Respond ONLY with a JSON object in this exact format:
+
     {{
-      "condition": "<most likely condition in plain language>",
+      "condition": "<most likely condition>",
       "severity": "<Mild | Moderate | Severe>",
-      "recommendations": ["<step 1>", "<step 2>", "<step 3>"]
+      "recommendations": [
+        "<recommendation1>",
+        "<recommendation2>",
+        "<recommendation3>"
+      ]
     }}
     """
 
-    message = client.messages.create(
-        model="claude-opus-4-5",
-        max_tokens=512,
-        messages=[{"role": "user", "content": prompt}]
-    )
+    try:
+        response = model.generate_content(prompt)
 
-    raw = message.content[0].text.strip()
-    result = json.loads(raw)  # safe because we prompted for pure JSON
-    return result
+        raw = response.text.strip()
+
+        print("\n========== GEMINI RAW RESPONSE ==========")
+        print(raw)
+        print("TYPE:", type(raw))
+        print("=========================================\n")
+
+        result = json.loads(raw)
+
+        return result
+
+    except json.JSONDecodeError:
+
+        raise HTTPException(
+            status_code=500,
+            detail="Gemini returned invalid JSON."
+        )
+
+    except Exception as e:
+      print("\n========== ERROR ==========")
+    print(e)
+    print("===========================\n")
+    raise HTTPException(
+        status_code=500,
+        detail=str(e)
+    )
