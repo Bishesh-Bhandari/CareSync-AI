@@ -77,3 +77,4 @@ def analyze(data: SymptomRequest):
         status_code=500,
         detail=str(e)
     )
+    
