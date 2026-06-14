@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — HealthSync AI</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="auth-wrapper">
+
+  <header class="auth-header">
+    <span class="logo-icon" aria-hidden="true">✦</span>
+    <h1 class="brand-title">HealthSync <span class="accent">AI</span></h1>
+    <p class="brand-tagline">Your intelligent health companion</p>
+  </header>
+
+  <div class="auth-card">
+    <h2 class="auth-card-title">Welcome back</h2>
+    <p class="auth-card-desc">Sign in to continue your health journey.</p>
+
+    <!-- JS shows this on error / success -->
+    <div id="alert" class="auth-alert" role="alert"></div>
+
+    <form class="auth-form" id="login-form" novalidate>
+
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email" required />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required />
+      </div>
+
+      <a href="#" class="forgot-link">Forgot password?</a>
+
+      <button type="submit" class="auth-btn" id="login-btn">
+        <span class="btn-text">Sign in</span>
+        <span class="btn-icon" aria-hidden="true">→</span>
+      </button>
+
+    </form>
+
+    <div class="auth-divider">or</div>
+    <p class="auth-switch">No account yet? <a href="register.html">Create one</a></p>
+  </div>
+
+  <p class="auth-disclaimer">HealthSync AI — not a substitute for professional medical advice.</p>
+
+</div>
+
+<script>
+  // ── If user is already logged in, skip straight to dashboard ──────────────
+  if (localStorage.getItem("hs_token")) {
+    window.location.href = "dashboard.html";
+  }
+
+  const form  = document.getElementById("login-form");
+  const btn   = document.getElementById("login-btn");
+  const alert = document.getElementById("alert");
+
+  function showAlert(type, msg) {
+    alert.className = "auth-alert " + type;
+    alert.textContent = msg;
+    alert.style.display = "block";
+  }
+
+  function setLoading(on) {
+    btn.disabled = on;
+    btn.querySelector(".btn-text").textContent = on ? "Signing in…" : "Sign in";
+    btn.querySelector(".btn-icon").textContent = on ? "⏳" : "→";
+  }
+
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const email    = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    // ── 1. Client-side validation ──────────────────────────────────────────
+    if (!email || !password) {
+      showAlert("error", "Please fill in all fields.");
+      return;
+    }
+
+    // ── 2. Loading state ───────────────────────────────────────────────────
+    setLoading(true);
+
+    try {
+      // ── 3. POST /auth/login ──────────────────────────────────────────────
+      const res  = await fetch("http://127.0.0.1:8000/auth/login", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        // FastAPI returns { detail: "..." } for errors
+        throw new Error(data.detail || "Login failed.");
+      }
+
+      // ── 4. Save token + user info → redirect ─────────────────────────────
+      localStorage.setItem("hs_token", data.token);
+      localStorage.setItem("hs_user",  JSON.stringify(data.user));
+      window.location.href = "dashboard.html";
+
+    } catch (err) {
+      showAlert("error", err.message);
+    } finally {
+      setLoading(false);
+    }
+  });
+</script>
+
+</body>
+</html>
