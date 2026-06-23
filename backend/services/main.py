@@ -39,25 +39,33 @@ from backend.services.database.db import (
     save_symptom_log,
     get_logs_for_user,
 )
+ 
 
-# ── simple in-memory session store ────────────────────────────────────────────
-# Maps  token (str)  →  user_id (int)
-# For a production app you'd use JWT or Redis; this is fine for a student project
-import secrets as _secrets
-SESSION_STORE: dict[str, int] = {}
+import secrets
+
+# token -> user_id
+SESSION_STORE = {}
 
 def create_session(user_id: int) -> str:
-    token = _secrets.token_hex(32)   # 64-char random string
+    """
+    Create a random token and remember which user owns it.
+    """
+    token = secrets.token_hex(32)
     SESSION_STORE[token] = user_id
     return token
 
-def get_user_from_token(token: str):
-    """Return user dict or None."""
-    user_id = SESSION_STORE.get(token)
-    if not user_id:
-        return None
-    return get_user_by_id(user_id)
 
+def get_user_from_token(token: str):
+    """
+    Convert token -> user.
+    Returns user dict or None.
+    """
+    user_id = SESSION_STORE.get(token)
+
+    if user_id is None:
+        return None
+
+    return get_user_by_id(user_id)
 
 # ── App setup ─────────────────────────────────────────────────────────────────
 app = FastAPI(title="HealthSync AI API")
