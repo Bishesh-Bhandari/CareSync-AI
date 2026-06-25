@@ -1,67 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard - HealthSync AI</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — HealthSync AI</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
-<div class="page-wrapper">
-
-  <header class="topbar">
-    <div class="topbar-brand">
-      <span class="logo-icon" aria-hidden="true">+</span>
-      <h1 class="brand-title">HealthSync <span class="accent">AI</span></h1>
+<header class="site-header">
+    <a href="/" class="logo">
+        <div class="logo-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        HealthSync<span>AI</span>
+    </a>
+    <div class="header-nav">
+        <div class="user-menu" id="userMenu">
+            <div class="user-avatar" id="userAvatar">?</div>
+            <span class="user-menu-name" id="userMenuName">Loading...</span>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="logoutBtn">Log Out</button>
     </div>
+</header>
 
-    <div class="topbar-right">
-      <span id="user-greeting" class="user-greeting">Hello</span>
-      <button type="button" id="logout-btn" class="logout-btn">Logout</button>
-    </div>
-  </header>
+<div class="dashboard">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="patient-card card" id="patientCard" style="padding:0; overflow:hidden;">
+            <div class="patient-card-header">
+                <h3 id="patientName">—</h3>
+                <div class="patient-email" id="patientEmail">—</div>
+            </div>
+            <div class="patient-card-body">
+                <div class="patient-stat">
+                    <span class="patient-stat-label">Patient since</span>
+                    <span class="patient-stat-value" id="patientSince">—</span>
+                </div>
+                <div class="patient-stat">
+                    <span class="patient-stat-label">Total check-ins</span>
+                    <span class="patient-stat-value" id="patientCheckins">0</span>
+                </div>
+            </div>
+        </div>
 
-  <main class="card">
-    <h2 class="card-title">Symptom Check</h2>
-    <p class="card-description">
-      Share what you are experiencing today.
-    </p>
+        <div class="health-ring-container">
+            <svg class="health-ring" viewBox="0 0 120 120">
+                <circle class="bg-circle" cx="60" cy="60" r="50"/>
+                <circle class="progress-circle" id="healthRing" cx="60" cy="60" r="50"
+                    stroke="var(--primary)" stroke-dasharray="314.16" stroke-dashoffset="314.16"
+                    transform="rotate(-90 60 60)"/>
+                <text class="ring-score" x="60" y="57" text-anchor="middle" id="ringScore">—</text>
+                <text class="ring-label" x="60" y="72" text-anchor="middle">Health Score</text>
+            </svg>
+            <div class="health-ring-caption" id="ringCaption">No data yet</div>
+        </div>
 
-    <label for="symptom-input" class="input-label">Symptoms</label>
-    <textarea
-      id="symptom-input"
-      class="symptom-textarea"
-      placeholder="Example: fever, headache, cough for two days"
-      rows="6"
-    ></textarea>
-    <span class="input-hint">Include timing, severity, and any recent changes.</span>
+        <button class="new-checkin-btn" id="newCheckinBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Check-in
+        </button>
 
-    <button type="button" id="submit-btn" class="submit-btn">
-      <span class="btn-text">Analyze Symptoms</span>
-      <span class="btn-icon" aria-hidden="true">&gt;</span>
-    </button>
+        <div>
+            <div class="sidebar-section-title">Quick Stats</div>
+            <div class="sidebar-quick-stats" id="quickStats">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+    </aside>
 
-    <section id="response-section" class="response-section" hidden aria-live="polite">
-      <div class="response-inner">
-        <span class="response-icon" aria-hidden="true"></span>
-        <div id="response-message" class="response-message"></div>
-      </div>
-    </section>
-  </main>
+    <!-- Main content -->
+    <main class="main-content">
+        <div class="dash-header">
+            <h1>Clinical Overview</h1>
+            <div class="dash-header-actions">
+                <div id="trendBadge"></div>
+            </div>
+        </div>
 
-  <section class="history-card">
-    <h2>Recent Checks</h2>
-    <p id="history-empty" class="history-empty">No symptom checks yet.</p>
-    <div id="history-list"></div>
-  </section>
+        <!-- Health Trajectory Chart -->
+        <div class="dash-section">
+            <div class="dash-section-header">
+                <h2 class="dash-section-title">Health Trajectory</h2>
+            </div>
+            <div class="card chart-card">
+                <div class="chart-wrapper">
+                    <canvas id="trajectoryChart"></canvas>
+                </div>
+                <div class="chart-legend">
+                    <div class="chart-legend-item">
+                        <span class="chart-legend-dot" style="background:var(--green)"></span>
+                        Improving
+                    </div>
+                    <div class="chart-legend-item">
+                        <span class="chart-legend-dot" style="background:var(--red)"></span>
+                        Worsening
+                    </div>
+                    <div class="chart-legend-item">
+                        <span class="chart-legend-dot" style="background:var(--amber)"></span>
+                        Stable
+                    </div>
+                </div>
+            </div>
+        </div>
 
-  <footer class="footer">
-    HealthSync AI is an educational demo and not a substitute for professional medical advice.
-  </footer>
+        <!-- Status + Heatmap row -->
+        <div class="dash-section">
+            <div class="grid-2col">
+                <!-- Clinical Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Clinical Status</h3>
+                    </div>
+                    <div class="status-grid" id="statusGrid">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
 
+                <!-- Symptom Heatmap -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Symptom Matrix</h3>
+                    </div>
+                    <div class="heatmap-scroll" id="heatmapContainer">
+                        <div class="empty-state" id="heatmapEmpty" style="padding:30px">
+                            <p>No symptom data to display</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Clinical Brief -->
+        <div class="dash-section">
+            <div class="dash-section-header">
+                <h2 class="dash-section-title">AI Clinical Brief</h2>
+                <button class="btn btn-ghost btn-sm" id="refreshSummary">Refresh</button>
+            </div>
+            <div class="card">
+                <div class="clinical-brief" id="clinicalBrief">Loading summary...</div>
+            </div>
+        </div>
+
+        <!-- Check-in History -->
+        <div class="dash-section">
+            <div class="dash-section-header">
+                <h2 class="dash-section-title">Check-in History</h2>
+            </div>
+            <div class="card" style="padding:16px 20px;">
+                <div class="timeline" id="checkinTimeline">
+                    <div class="empty-state" id="timelineEmpty">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                        <h3>No check-ins yet</h3>
+                        <p>Click "New Check-in" in the sidebar to record your first symptoms.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 </div>
 
+<!-- New Check-in Modal -->
+<div class="modal-overlay" id="checkinModal">
+    <div class="modal">
+        <h2>New Check-in</h2>
+        <p class="modal-subtitle">Describe what you're experiencing right now</p>
+        <form id="checkinForm">
+            <div class="form-group">
+                <label for="symptomText">Symptoms</label>
+                <div class="voice-wrapper">
+                    <textarea id="symptomText" class="form-input" rows="4"
+                        placeholder="e.g., mild headache, feeling tired, some nausea after lunch..."></textarea>
+                    <button type="button" class="voice-btn" id="voiceBtn" title="Voice input">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="moodSelect">Overall Mood</label>
+                    <select id="moodSelect" class="form-input">
+                        <option value="good">Good</option>
+                        <option value="okay" selected>Okay</option>
+                        <option value="bad">Bad</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="medications">Medications</label>
+                    <input type="text" id="medications" class="form-input" placeholder="e.g., Ibuprofen 400mg">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="notes">Additional Notes (optional)</label>
+                <input type="text" id="notes" class="form-input" placeholder="Anything else your doctor should know">
+            </div>
+            <div id="checkinError" class="form-error" style="display:none"></div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="cancelCheckin">Cancel</button>
+                <button type="submit" class="btn btn-primary">Submit Check-in</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="toastContainer"></div>
 <script src="script.js"></script>
 </body>
 </html>
