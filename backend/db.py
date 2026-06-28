@@ -188,3 +188,4 @@ def seed_demo_data():
         create_checkin(uid, text, symptoms, severity, health_score, mood, meds, notes)
 
     return True
+

@@ -72,7 +72,7 @@ if (loginForm) {
         errEl.style.display = 'none';
 
         try {
-            await api('/api/login', {
+         await api('/api/login', {
                 method: 'POST',
                 body: JSON.stringify({
                     email: document.getElementById('email').value.trim(),
